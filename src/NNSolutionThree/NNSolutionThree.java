@@ -86,7 +86,7 @@ public class NNSolutionThree {
 					inputs.get(j).QueueInputValue(Double.parseDouble(inputStrings[j]));
 				}
 			}
-
+			
 			//Finally...
 			BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(System.out));
 			bw.write(InputCicles.toString() + "\n");
