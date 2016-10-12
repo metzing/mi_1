@@ -6,29 +6,30 @@ import java.util.List;
 /**
  * Created by Márton on 10/10/2016.
  */
-public class HiddenNeuron implements NeuronInput,Weightable {
-	private int inputCount;
-	private double bias;
-	private List<Double> weights;
-	private List<NeuronInput> inputs;
-
+public class HiddenNeuron extends Neuron implements NeuronInput {
 	public HiddenNeuron(List<NeuronInput> _inputs) {
-		inputCount = _inputs.size();
+		outputs = new ArrayList<>();
 		inputs = new ArrayList<>();
 		inputs.addAll(_inputs);
+		hasDerivates = false;
 	}
 
 	@Override
-	public void setWeights(List<Double> _weights, double _bias){
-		weights = new ArrayList<>();
-		weights.addAll(_weights);
-		bias = _bias;
+	public List<Double> getDerivates() {
+		if (hasDerivates) return derivates;
+		//TODO actual shit here
+		return null;
+	}
+
+	@Override
+	public void addOutput(Neuron _output) {
+		outputs.add(_output);
 	}
 
 	@Override
 	public double getInput() {
 		double out = 0;
-		for (int i = 0; i < inputCount; i++) {
+		for (int i = 0; i < inputs.size(); i++) {
 			out += weights.get(i) * inputs.get(i).getInput();
 		}
 		out += bias;
