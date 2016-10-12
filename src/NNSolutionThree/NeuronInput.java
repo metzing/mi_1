@@ -5,4 +5,5 @@ package NNSolutionThree;
  */
 public interface NeuronInput {
 	double getInput();
+	void addOutput(Neuron n);
 }

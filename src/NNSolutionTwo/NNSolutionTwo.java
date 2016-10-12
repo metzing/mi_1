@@ -6,14 +6,14 @@ import java.util.*;
 public class NNSolutionTwo {
 	private static List<InputNeuron> inputNeurons;
 	private static List<OutputNeuron> outputNeurons;
-	private static List<Weightable> weightableNeurons;
+	private static List<Neuron> allNeurons;
 
 	public static void main(String[] args) {
 		try {
 			//Init input, output Lists
 			inputNeurons = new ArrayList<>();
 			outputNeurons = new ArrayList<>();
-			weightableNeurons = new ArrayList<>();
+			allNeurons = new ArrayList<>();
 
 			//Init input Stream
 			BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
@@ -22,14 +22,14 @@ public class NNSolutionTwo {
 			String architecture = br.readLine();
 			String[] inputValues = architecture.split(",");
 
-			//Get InputNeuron, Output counts
+			//Get Input, Output counts
 			int InputCount = Integer.parseInt(inputValues[0]),
 					OutputCount = Integer.parseInt((inputValues[inputValues.length - 1]));
 
 			//The prev layer of either HiddenNeurons or Inputs
 			List<NeuronInput> prevLayer = new ArrayList<>();
 
-			//Set up InputNeuron Layer
+			//Set up Input Layer
 			for (int i = 0; i < InputCount; i++) {
 				InputNeuron currentInputNeuron = new InputNeuron();
 				inputNeurons.add(currentInputNeuron);
@@ -44,7 +44,7 @@ public class NNSolutionTwo {
 				for (int j = 0; j < Integer.parseInt(inputValues[i]); j++) {
 					HiddenNeuron currentNeuron = new HiddenNeuron(prevLayer);
 					currentLayer.add(currentNeuron);
-					weightableNeurons.add(currentNeuron);
+					allNeurons.add(currentNeuron);
 				}
 				prevLayer.clear();
 				prevLayer.addAll(currentLayer);
@@ -55,11 +55,11 @@ public class NNSolutionTwo {
 			for (int i = 0; i < OutputCount; i++) {
 				OutputNeuron currentNeuron = new OutputNeuron(prevLayer);
 				outputNeurons.add(currentNeuron);
-				weightableNeurons.add(currentNeuron);
+				allNeurons.add(currentNeuron);
 			}
 
 			//Set the weights of Neurons
-			for (Weightable w : weightableNeurons) {
+			for (Neuron w : allNeurons) {
 				String[] weightStrings = br.readLine().split(",");
 				List<Double> weights = new ArrayList<>();
 
@@ -109,4 +109,101 @@ public class NNSolutionTwo {
 		}
 		return outs;
 	}
+
+	interface NeuronInput {
+		double getInput();
+	}
+
+	static class InputNeuron implements NeuronInput {
+		private int CurrentIndex;
+		private List<Double> values;
+
+		public InputNeuron() {
+			values = new ArrayList<>();
+			CurrentIndex = -1;
+		}
+
+		public void QueueInputValue(double d) {
+			values.add(d);
+		}
+
+		public void OnNextInput() {
+			CurrentIndex++;
+		}
+
+		@Override
+		public double getInput() {
+			return values.get(CurrentIndex);
+		}
+	}
+
+	static abstract class Neuron {
+		protected double bias;
+		protected List<Double> weights;
+		protected boolean hasDerivates;
+		protected List<Double> derivates;
+		protected List<NeuronInput> inputs;
+		protected List<Neuron> outputs;
+
+		public void setWeights(List<Double> _weights, double _bias) {
+			weights = new ArrayList<>();
+			weights.addAll(_weights);
+			bias = _bias;
+		}
+
+		public void addOutput(Neuron _output) {
+			outputs.add(_output);
+		}
+
+		public abstract List<Double> getDerivates();
+	}
+
+	static class HiddenNeuron extends Neuron implements NeuronInput {
+		public HiddenNeuron(List<NeuronInput> _inputs) {
+			outputs = new ArrayList<>();
+			inputs = new ArrayList<>();
+			inputs.addAll(_inputs);
+			hasDerivates = false;
+		}
+
+		@Override
+		public List<Double> getDerivates() {
+			if (hasDerivates) return derivates;
+			//TODO actual shit here
+			return null;
+		}
+
+		@Override
+		public double getInput() {
+			double out = 0;
+			for (int i = 0; i < inputs.size(); i++) {
+				out += weights.get(i) * inputs.get(i).getInput();
+			}
+			out += bias;
+			return Math.max(0.0, out);
+		}
+	}
+
+	static class OutputNeuron extends Neuron {
+		public OutputNeuron(List<NeuronInput> _inputs) {
+			inputs = new ArrayList<>();
+			inputs.addAll(_inputs);
+		}
+
+		@Override
+		public List<Double> getDerivates() {
+			return null;
+		}
+
+		public double getOutput() {
+			double out = 0;
+			for (int i = 0; i < inputs.size(); i++) {
+				out += weights.get(i) * inputs.get(i).getInput();
+			}
+			out += bias;
+			return out;
+		}
+	}
+
+
 }

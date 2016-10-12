@@ -4,14 +4,15 @@ import java.io.*;
 import java.util.*;
 
 public class NNSolutionThree {
-	private static List<InputNeuron> inputNeurons;
+	private static List<Input> inputs;
 	private static List<OutputNeuron> outputNeurons;
-	private static List<Weightable> weightableNeurons;
+	private static List<Neuron> weightableNeurons;
+
 
 	public static void main(String[] args) {
 		try {
 			//Init input, output Lists
-			inputNeurons = new ArrayList<>();
+			inputs = new ArrayList<>();
 			outputNeurons = new ArrayList<>();
 			weightableNeurons = new ArrayList<>();
 
@@ -22,18 +23,18 @@ public class NNSolutionThree {
 			String architecture = br.readLine();
 			String[] inputValues = architecture.split(",");
 
-			//Get InputNeuron, Output counts
+			//Get Input, Output counts
 			int InputCount = Integer.parseInt(inputValues[0]),
 					OutputCount = Integer.parseInt((inputValues[inputValues.length - 1]));
 
 			//The prev layer of either HiddenNeurons or Inputs
 			List<NeuronInput> prevLayer = new ArrayList<>();
 
-			//Set up InputNeuron Layer
+			//Set up Input Layer
 			for (int i = 0; i < InputCount; i++) {
-				InputNeuron currentInputNeuron = new InputNeuron();
-				inputNeurons.add(currentInputNeuron);
-				prevLayer.add(currentInputNeuron);
+				Input currentInput = new Input();
+				inputs.add(currentInput);
+				prevLayer.add(currentInput);
 			}
 
 			List<NeuronInput> currentLayer = new ArrayList<>();
@@ -44,6 +45,9 @@ public class NNSolutionThree {
 				for (int j = 0; j < Integer.parseInt(inputValues[i]); j++) {
 					HiddenNeuron currentNeuron = new HiddenNeuron(prevLayer);
 					currentLayer.add(currentNeuron);
+					for (NeuronInput n : prevLayer) {
+						n.addOutput(currentNeuron);
+					}
 					weightableNeurons.add(currentNeuron);
 				}
 				prevLayer.clear();
@@ -55,11 +59,14 @@ public class NNSolutionThree {
 			for (int i = 0; i < OutputCount; i++) {
 				OutputNeuron currentNeuron = new OutputNeuron(prevLayer);
 				outputNeurons.add(currentNeuron);
+				for (NeuronInput n : prevLayer) {
+					n.addOutput(currentNeuron);
+				}
 				weightableNeurons.add(currentNeuron);
 			}
 
 			//Set the weights of Neurons
-			for (Weightable w : weightableNeurons) {
+			for (Neuron w : weightableNeurons) {
 				String[] weightStrings = br.readLine().split(",");
 				List<Double> weights = new ArrayList<>();
 
@@ -75,11 +82,11 @@ public class NNSolutionThree {
 
 			for (int i = 0; i < InputCicles; i++) {
 				String[] inputStrings = br.readLine().split(",");
-				for (int j = 0; j < inputNeurons.size(); j++) {
-					inputNeurons.get(j).QueueInputValue(Double.parseDouble(inputStrings[j]));
+				for (int j = 0; j < inputs.size(); j++) {
+					inputs.get(j).QueueInputValue(Double.parseDouble(inputStrings[j]));
 				}
 			}
-
+			
 			//Finally...
 			BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(System.out));
 			bw.write(InputCicles.toString() + "\n");
@@ -101,7 +108,7 @@ public class NNSolutionThree {
 
 	private static List<Double> GetNextOutputList() {
 		List<Double> outs = new ArrayList<>();
-		for (InputNeuron in : inputNeurons) {
+		for (Input in : inputs) {
 			in.OnNextInput();
 		}
 		for (OutputNeuron on : outputNeurons) {
