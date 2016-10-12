@@ -9,7 +9,7 @@ public class Input implements NeuronInput {
 
 	public Input() {
 		values = new ArrayList<>();
-		CurrentIndex = -1;
+		CurrentIndex = 0;
 	}
 
 	public void QueueInputValue(double d) {

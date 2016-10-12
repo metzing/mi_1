@@ -6,7 +6,7 @@ import java.util.*;
 public class NNSolutionThree {
 	private static List<Input> inputs;
 	private static List<OutputNeuron> outputNeurons;
-	private static List<Neuron> weightableNeurons;
+	private static List<Neuron> allNeurons;
 
 
 	public static void main(String[] args) {
@@ -14,7 +14,7 @@ public class NNSolutionThree {
 			//Init input, output Lists
 			inputs = new ArrayList<>();
 			outputNeurons = new ArrayList<>();
-			weightableNeurons = new ArrayList<>();
+			allNeurons = new ArrayList<>();
 
 			//Init input Stream
 			BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
@@ -43,12 +43,12 @@ public class NNSolutionThree {
 			for (int i = 1; i < inputValues.length - 1; i++) {
 				//We create a new Layer of HiddenNeurons with their number being in the said Integer
 				for (int j = 0; j < Integer.parseInt(inputValues[i]); j++) {
-					HiddenNeuron currentNeuron = new HiddenNeuron(prevLayer);
+					HiddenNeuron currentNeuron = new HiddenNeuron(prevLayer, j);
 					currentLayer.add(currentNeuron);
 					for (NeuronInput n : prevLayer) {
 						n.addOutput(currentNeuron);
 					}
-					weightableNeurons.add(currentNeuron);
+					allNeurons.add(currentNeuron);
 				}
 				prevLayer.clear();
 				prevLayer.addAll(currentLayer);
@@ -57,16 +57,16 @@ public class NNSolutionThree {
 
 			//And last lets create the outputs
 			for (int i = 0; i < OutputCount; i++) {
-				OutputNeuron currentNeuron = new OutputNeuron(prevLayer);
+				OutputNeuron currentNeuron = new OutputNeuron(prevLayer, i);
 				outputNeurons.add(currentNeuron);
 				for (NeuronInput n : prevLayer) {
 					n.addOutput(currentNeuron);
 				}
-				weightableNeurons.add(currentNeuron);
+				allNeurons.add(currentNeuron);
 			}
 
 			//Set the weights of Neurons
-			for (Neuron w : weightableNeurons) {
+			for (Neuron w : allNeurons) {
 				String[] weightStrings = br.readLine().split(",");
 				List<Double> weights = new ArrayList<>();
 
@@ -86,19 +86,13 @@ public class NNSolutionThree {
 					inputs.get(j).QueueInputValue(Double.parseDouble(inputStrings[j]));
 				}
 			}
-			
+
 			//Finally...
-			BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(System.out));
-			bw.write(InputCicles.toString() + "\n");
-			for (int i = 0; i < InputCicles; i++) {
-				List<Double> outputs = GetNextOutputList();
-				for (int j = 0; j < outputs.size(); j++) {
-					bw.write(outputs.get(j).toString());
-					if (!(j == outputs.size() - 1)) bw.write(',');
-				}
-				bw.write("\n");
+			System.out.println(architecture);
+			for (Neuron n: allNeurons) {
+				printDoubleList(n.getDerivates());
 			}
-			bw.flush();
+
 
 		} catch (Exception e) {
 			System.err.println(e.getMessage());
@@ -106,14 +100,11 @@ public class NNSolutionThree {
 		}
 	}
 
-	private static List<Double> GetNextOutputList() {
-		List<Double> outs = new ArrayList<>();
-		for (Input in : inputs) {
-			in.OnNextInput();
+	private static void printDoubleList(List<Double> list){
+		for (int i=0; i<list.size();i++){
+			System.out.print(list.get(i));
+			if (i!=list.size()-1) System.out.print(",");
 		}
-		for (OutputNeuron on : outputNeurons) {
-			outs.add(on.getOutput());
-		}
-		return outs;
+		System.out.print("\n");
 	}
 }
