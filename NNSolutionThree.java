@@ -4,7 +4,7 @@ import java.io.*;
 import java.util.*;
 
 public class NNSolutionThree {
-	private static List<Input> inputs;
+	private static List<Source> sources;
 	private static List<OutputNeuron> outputNeurons;
 	private static List<Neuron> allNeurons;
 
@@ -12,7 +12,7 @@ public class NNSolutionThree {
 	public static void main(String[] args) {
 		try {
 			//Init input, output Lists
-			inputs = new ArrayList<>();
+			sources = new ArrayList<>();
 			outputNeurons = new ArrayList<>();
 			allNeurons = new ArrayList<>();
 
@@ -23,45 +23,39 @@ public class NNSolutionThree {
 			String architecture = br.readLine();
 			String[] inputValues = architecture.split(",");
 
-			//Get Input, Output counts
+			//Get Source, Output counts
 			int InputCount = Integer.parseInt(inputValues[0]),
 					OutputCount = Integer.parseInt((inputValues[inputValues.length - 1]));
 
-			//The prev layer of either HiddenNeurons or Inputs
-			List<NeuronInput> prevLayer = new ArrayList<>();
+			Layer previousLayer = new Layer();
 
-			//Set up Input Layer
+			//Set up Source Layer
 			for (int i = 0; i < InputCount; i++) {
-				Input currentInput = new Input();
-				inputs.add(currentInput);
-				prevLayer.add(currentInput);
+				Source currentSource = new Source();
+				sources.add(currentSource);
+				previousLayer.addInput(currentSource);
 			}
 
-			List<NeuronInput> currentLayer = new ArrayList<>();
+			Layer currentLayer = new Layer();
 
 			//For each Integer in the first line (except first and last)
 			for (int i = 1; i < inputValues.length - 1; i++) {
 				//We create a new Layer of HiddenNeurons with their number being in the said Integer
 				for (int j = 0; j < Integer.parseInt(inputValues[i]); j++) {
-					HiddenNeuron currentNeuron = new HiddenNeuron(prevLayer, j);
-					currentLayer.add(currentNeuron);
-					for (NeuronInput n : prevLayer) {
-						n.addOutput(currentNeuron);
-					}
+					HiddenNeuron currentNeuron = new HiddenNeuron(previousLayer, j);
+					currentLayer.addInput(currentNeuron);
+					previousLayer.addOutput(currentNeuron);
 					allNeurons.add(currentNeuron);
 				}
-				prevLayer.clear();
-				prevLayer.addAll(currentLayer);
-				currentLayer.clear();
+				previousLayer = currentLayer;
+				currentLayer = new Layer();
 			}
 
 			//And last lets create the outputs
 			for (int i = 0; i < OutputCount; i++) {
-				OutputNeuron currentNeuron = new OutputNeuron(prevLayer, i);
+				OutputNeuron currentNeuron = new OutputNeuron(previousLayer, i);
 				outputNeurons.add(currentNeuron);
-				for (NeuronInput n : prevLayer) {
-					n.addOutput(currentNeuron);
-				}
+				previousLayer.addOutput(currentNeuron);
 				allNeurons.add(currentNeuron);
 			}
 
@@ -77,13 +71,13 @@ public class NNSolutionThree {
 				w.setWeights(weights, Double.parseDouble(weightStrings[weightStrings.length - 1]));
 			}
 
-			//Queue inputs
+			//Queue sources
 			Integer InputCicles = Integer.parseInt(br.readLine());
 
 			for (int i = 0; i < InputCicles; i++) {
 				String[] inputStrings = br.readLine().split(",");
-				for (int j = 0; j < inputs.size(); j++) {
-					inputs.get(j).QueueInputValue(Double.parseDouble(inputStrings[j]));
+				for (int j = 0; j < sources.size(); j++) {
+					sources.get(j).QueueInputValue(Double.parseDouble(inputStrings[j]));
 				}
 			}
 

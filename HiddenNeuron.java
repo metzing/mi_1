@@ -1,20 +1,28 @@
 package NNSolutionThree;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
- * Created by Márton on 10/10/2016.
+ * Represents a Neuron in one of the "middle" layers
  */
-public class HiddenNeuron extends Neuron implements NeuronInput {
-	public HiddenNeuron(List<NeuronInput> _inputs, int _indexInLayer) {
+public class HiddenNeuron extends Neuron{
+	/**
+	 * Creates a HiddenNeuron object and connects it to the NeuronInputs of the previous layer
+	 * @param previousLayer The previous layer
+	 * @param _indexInLayer This Neuron's index in it's layer
+	 */
+	public HiddenNeuron(Layer previousLayer, int _indexInLayer) {
 		outputs = new ArrayList<>();
 		inputs = new ArrayList<>();
-		inputs.addAll(_inputs);
+		inputs.addAll(previousLayer.getInputs());
 		hasDerivates = false;
 		indexInLayer = _indexInLayer;
 	}
 
+	/**
+	 * Returns the delta value of this Neuron
+	 * @return The delta value of this Neuron
+	 */
 	@Override
 	public double getDelta() {
 		if (hasDelta) return delta;
@@ -31,25 +39,28 @@ public class HiddenNeuron extends Neuron implements NeuronInput {
 		return delta;
 	}
 
+	/**
+	 * Returns the output value of this Neuron, with the activation function applied
+	 * @return The output of this Neuron
+	 */
 	@Override
-	public void addOutput(Neuron _output) {
-		outputs.add(_output);
-	}
-
-	@Override
-	public double getInput() {
+	public double getOutput() {
 		return Math.max(0.0, getRawOutput());
 	}
 
-	private double getRawOutput(){
-		double out = 0;
-		for (int i = 0; i < inputs.size(); i++) {
-			out += weights.get(i) * inputs.get(i).getInput();
-		}
-		out += bias;
-		return out;
+	/**
+	 * Adds an outgoing connection from this HiddenNeuron to one of the Neurons in the next layer
+	 * @param _output The Neuron in the next layer
+	 */
+	public void addOutgoingConnection(Neuron _output) {
+		outputs.add(_output);
 	}
 
+	/**
+	 * Returns the value of the derivate of the ReLU function at "d"
+	 * @param d The value where you need the derivate
+	 * @return The value of the said function at "d"
+	 */
 	private double ReLUDer(double d){
 		return d>0 ? 1 : 0;
 	}
