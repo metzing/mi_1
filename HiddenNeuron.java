@@ -1,13 +1,14 @@
-package NNSolutionThree;
+package NNSolutionFour;
 
 import java.util.ArrayList;
 
 /**
- * Represents a Neuron in one of the "middle" layers
+ * Represents a Neuron in one of the hidden layers
  */
-public class HiddenNeuron extends Neuron{
+public class HiddenNeuron extends Neuron {
 	/**
 	 * Creates a HiddenNeuron object and connects it to the NeuronInputs of the previous layer
+	 *
 	 * @param previousLayer The previous layer
 	 * @param _indexInLayer This Neuron's index in it's layer
 	 */
@@ -21,6 +22,7 @@ public class HiddenNeuron extends Neuron{
 
 	/**
 	 * Returns the delta value of this Neuron
+	 *
 	 * @return The delta value of this Neuron
 	 */
 	@Override
@@ -31,7 +33,7 @@ public class HiddenNeuron extends Neuron{
 		delta = 0;
 
 		for (Neuron n : outputs) {
-			delta += n.getDelta()*n.getWeight(indexInLayer);
+			delta += n.getDelta() * n.getWeight(indexInLayer);
 		}
 
 		delta *= ReLUDer(getRawOutput());
@@ -41,6 +43,7 @@ public class HiddenNeuron extends Neuron{
 
 	/**
 	 * Returns the output value of this Neuron, with the activation function applied
+	 *
 	 * @return The output of this Neuron
 	 */
 	@Override
@@ -50,6 +53,7 @@ public class HiddenNeuron extends Neuron{
 
 	/**
 	 * Adds an outgoing connection from this HiddenNeuron to one of the Neurons in the next layer
+	 *
 	 * @param _output The Neuron in the next layer
 	 */
 	public void addOutgoingConnection(Neuron _output) {
@@ -58,10 +62,16 @@ public class HiddenNeuron extends Neuron{
 
 	/**
 	 * Returns the value of the derivate of the ReLU function at "d"
+	 *
 	 * @param d The value where you need the derivate
 	 * @return The value of the said function at "d"
 	 */
-	private double ReLUDer(double d){
-		return d>0 ? 1 : 0;
+	private double ReLUDer(double d) {
+		return d > 0 ? 1 : 0;
+	}
+
+	@Override
+	protected double getDeltaForDerivates() {
+		return getDelta();
 	}
 }

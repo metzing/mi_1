@@ -1,4 +1,4 @@
-package NNSolutionThree;
+package NNSolutionFour;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,18 +30,23 @@ public abstract class Neuron implements NeuronInput {
 
 	/**
 	 * Asks for a Neuron's current output (with the activation function applied)
+	 *
 	 * @return Output of the Neuron
 	 */
 	public abstract double getOutput();
 
 	/**
 	 * Gets the delta value
+	 *
 	 * @return The delta value
 	 */
 	protected abstract double getDelta();
 
+	protected abstract double getDeltaForDerivates();
+
 	/**
 	 * Sets the weights and the bias of this object
+	 *
 	 * @param _weights
 	 * @param _bias
 	 */
@@ -53,6 +58,7 @@ public abstract class Neuron implements NeuronInput {
 
 	/**
 	 * Returns the weight of one of the inputs
+	 *
 	 * @param index
 	 * @return
 	 */
@@ -61,17 +67,29 @@ public abstract class Neuron implements NeuronInput {
 	}
 
 	/**
+	 * Returns all the weights associated to this neuron, with it's bias appended
+	 *
+	 * @return
+	 */
+	public List<Double> getAllWeights(){
+		List<Double> copy = new ArrayList<>(weights);
+		copy.add(bias);
+		return copy;
+	}
+
+	/**
 	 * Returns a list with dem derivates
+	 *
 	 * @return Derivates of weights and (at the last position) the bias
 	 */
 	public List<Double> getDerivates() {
-		if(hasDerivates) return derivates;
+		if (hasDerivates) return derivates;
 
 		derivates = new ArrayList<>();
 		hasDerivates = true;
 
-		for (NeuronInput in : inputs){
-			derivates.add(getDelta()*in.getOutput());
+		for (NeuronInput in : inputs) {
+			derivates.add(getDeltaForDerivates() * in.getOutput());
 		}
 
 		derivates.add(getDelta());
@@ -81,9 +99,10 @@ public abstract class Neuron implements NeuronInput {
 
 	/**
 	 * Returns the raw output of this neuron (with the activation function not applied)
+	 *
 	 * @return Raw output
 	 */
-	protected double getRawOutput(){
+	protected double getRawOutput() {
 		double out = 0;
 
 		for (int i = 0; i < inputs.size(); i++) {
@@ -93,5 +112,14 @@ public abstract class Neuron implements NeuronInput {
 		out += bias;
 
 		return out;
+	}
+
+	public double getInputAt(int index){
+		return inputs.get(index).getOutput();
+	}
+
+	public void markDirty(){
+		hasDerivates = false;
+		hasDelta = false;
 	}
 }

@@ -1,4 +1,4 @@
-package NNSolutionThree;
+package NNSolutionFour;
 
 import java.util.ArrayList;
 
@@ -6,8 +6,11 @@ import java.util.ArrayList;
  * Created by Márton on 10/10/2016.
  */
 public class OutputNeuron extends Neuron {
+	double desiredOutput;
+
 	/**
 	 * Creates an OutputNeuron object and connects it to the NeuronInputs of the previous layer
+	 *
 	 * @param previousLayer The previous layer
 	 * @param _indexInLayer This Neuron's index in it's layer
 	 */
@@ -20,15 +23,26 @@ public class OutputNeuron extends Neuron {
 
 	/**
 	 * Returns the delta value of this Neuron
+	 *
 	 * @return The delta value of this Neuron
 	 */
 	@Override
-	public double getDelta(){
+	public double getDelta() {
+		return desiredOutput-getOutput();
+	}
+
+	public void setDesiredOutput(double d){
+		desiredOutput = d;
+	}
+
+	@Override
+	public double getDeltaForDerivates(){
 		return 1.0;
 	}
 
 	/**
 	 * Returns the output value of this Neuron, with the activation function applied
+	 *
 	 * @return The output of this Neuron
 	 */
 	@Override

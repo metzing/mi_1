@@ -1,45 +1,32 @@
-package NNSolutionThree;
-
-import java.util.*;
+package NNSolutionFour;
 
 /**
  * Represents an input to the Neural Network
  */
-public class Source implements NeuronInput{
-	//The values queued to be source values
-	private List<Double> values;
-	//The index of the current value in the list
-	private int CurrentIndex;
+public class Source implements NeuronInput {
+	private double output;
 
 	/**
 	 * Constructs a new, empty Source object
 	 */
-	public Source() {
-		values = new ArrayList<>();
-		CurrentIndex = 0;
-	}
+	public Source() {}
 
 	/**
-	 * Adds a value to the waiting queue
+	 * Sets the output of this Source
+	 *
 	 * @param d
 	 */
-	public void QueueInputValue(double d) {
-		values.add(d);
-	}
-
-	/**
-	 * Jumps to the next value in the queue
-	 */
-	public void OnNextInput() {
-		CurrentIndex++;
+	public void setOutput(double d) {
+		output = d;
 	}
 
 	/**
 	 * Returns the current output value
+	 *
 	 * @return The current output value
 	 */
 	@Override
 	public double getOutput() {
-		return values.get(CurrentIndex);
+		return output;
 	}
 }
