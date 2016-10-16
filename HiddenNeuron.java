@@ -1,6 +1,7 @@
-package NNSolutionFour;
+package NNSolutionFive;
 
-import java.util.ArrayList;
+import java.util.*;
+
 
 /**
  * Represents a Neuron in one of the hidden layers
@@ -68,10 +69,5 @@ public class HiddenNeuron extends Neuron {
 	 */
 	private double ReLUDer(double d) {
 		return d > 0 ? 1 : 0;
-	}
-
-	@Override
-	protected double getDeltaForDerivates() {
-		return getDelta();
 	}
 }

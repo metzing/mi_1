@@ -1,7 +1,7 @@
-package NNSolutionFour;
+package NNSolutionFive;
 
 /**
- * Represents an input to the Neural Network
+ * Represents a source to the Neural Network
  */
 public class Source implements NeuronInput {
 	private double output;
@@ -11,12 +11,7 @@ public class Source implements NeuronInput {
 	 */
 	public Source() {}
 
-	/**
-	 * Sets the output of this Source
-	 *
-	 * @param d
-	 */
-	public void setOutput(double d) {
+	public void setOutput(double d){
 		output = d;
 	}
 

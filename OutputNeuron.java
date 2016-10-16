@@ -1,12 +1,14 @@
-package NNSolutionFour;
+package NNSolutionFive;
 
-import java.util.ArrayList;
+import java.util.*;
 
 /**
- * Created by Márton on 10/10/2016.
+ * Represents an output to the Neural Network
  */
 public class OutputNeuron extends Neuron {
 	double desiredOutput;
+
+	double error;
 
 	/**
 	 * Creates an OutputNeuron object and connects it to the NeuronInputs of the previous layer
@@ -18,6 +20,7 @@ public class OutputNeuron extends Neuron {
 		inputs = new ArrayList<>();
 		inputs.addAll(previousLayer.getInputs());
 		hasDerivates = false;
+		hasError = false;
 		indexInLayer = _indexInLayer;
 	}
 
@@ -28,16 +31,7 @@ public class OutputNeuron extends Neuron {
 	 */
 	@Override
 	public double getDelta() {
-		return desiredOutput-getOutput();
-	}
-
-	public void setDesiredOutput(double d){
-		desiredOutput = d;
-	}
-
-	@Override
-	public double getDeltaForDerivates(){
-		return 1.0;
+		return 1;
 	}
 
 	/**
@@ -47,6 +41,27 @@ public class OutputNeuron extends Neuron {
 	 */
 	@Override
 	public double getOutput() {
-		return getRawOutput();
+		double d = getRawOutput();
+		return d;
+	}
+
+	public void setDesiredOutput(double d){
+		desiredOutput = d;
+	}
+
+	public double getError(boolean validation) {
+		if (validation){
+			//This is needed so that in the next epoch's first learning sample recalculates this.
+			hasError = false;
+
+			error = desiredOutput - getOutput();
+		}
+		else {
+			if (hasError) return error;
+			hasError = true;
+
+			error = desiredOutput - getOutput();
+		}
+		return error;
 	}
 }

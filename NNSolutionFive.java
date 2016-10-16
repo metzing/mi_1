@@ -1,10 +1,10 @@
-package NNSolutionFour;
+package NNSolutionFive;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.util.*;
+import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 
-public class NNSolutionFour {
+public class NNSolutionFive {
 	private static List<Source> sources;
 	private static List<OutputNeuron> outputNeurons;
 	private static List<Neuron> allNeurons;
@@ -17,11 +17,11 @@ public class NNSolutionFour {
 			allNeurons = new ArrayList<>();
 
 			//Init input Stream
-			BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+			BufferedReader br = new BufferedReader(new FileReader("input.txt"));
 
 			//Get learning parameters
 			String[] learningParametersString = br.readLine().split(",");
-			int numberofEpochs = Integer.parseInt(learningParametersString[0]);
+			int numberOfEpochs = Integer.parseInt(learningParametersString[0]);
 			double mu = Double.parseDouble(learningParametersString[1]);
 			double learningSampleRatio = Double.parseDouble(learningParametersString[2]);
 
@@ -46,7 +46,7 @@ public class NNSolutionFour {
 
 			//Set up Hidden Layer(s)
 			for (int i = 1; i < inputValues.length - 1; i++) {
-				//We create a new Layer of HiddenNeurons with their number being in the said Integer
+				//We create a new Layer of HiddenNeurons
 				for (int j = 0; j < Integer.parseInt(inputValues[i]); j++) {
 					HiddenNeuron currentNeuron = new HiddenNeuron(previousLayer, j);
 					currentLayer.addInput(currentNeuron);
@@ -67,7 +67,7 @@ public class NNSolutionFour {
 
 			//Set the weights of Neurons
 			for (Neuron w : allNeurons) {
-				String[] weightStrings = br.readLine().split(",");
+				String[] weightStrings = br.readLine().split("\t");
 				List<Double> weights = new ArrayList<>();
 
 				for (int i = 0; i < weightStrings.length - 1; i++) {
@@ -85,7 +85,7 @@ public class NNSolutionFour {
 			List<Double> currentSample;
 
 			for (int i = 0; i < Math.floor(numberOfSamples * learningSampleRatio); i++) {
-				String[] currentSampleString = br.readLine().split(",");
+				String[] currentSampleString = br.readLine().split("\t");
 				currentSample = new ArrayList<>();
 				for (int j = 0; j < currentSampleString.length; j++) {
 					currentSample.add(Double.parseDouble(currentSampleString[j]));
@@ -97,7 +97,7 @@ public class NNSolutionFour {
 			List<List<Double>> validationSamples = new ArrayList<>();
 
 			for (int i = 0; i < Math.ceil(numberOfSamples * (1 - learningSampleRatio)); i++) {
-				String[] currentSampleString = br.readLine().split(",");
+				String[] currentSampleString = br.readLine().split("\t");
 				currentSample = new ArrayList<>();
 				for (int j = 0; j < currentSampleString.length; j++) {
 					currentSample.add(Double.parseDouble(currentSampleString[j]));
@@ -105,75 +105,71 @@ public class NNSolutionFour {
 				validationSamples.add(currentSample);
 			}
 
+
+
 			//For each epoch
-			for (int i = 0; i < numberofEpochs; i++) {
+			for (int i = 0; i < numberOfEpochs; i++) {
 				//Learn from all learning samples
 				for (int j = 0; j < learningSamples.size(); j++) {
 					//Set inputs for this sample
 					currentSample = learningSamples.get(j);
-					for (int k = 0; k < sources.size() - 1; k++) {
+					for (int k = 0; k < sources.size(); k++) {
 						sources.get(k).setOutput(currentSample.get(k));
 					}
 
 					//Set desired outputs
-					for (int k = sources.size(); k < currentSample.size(); k++) {
-						outputNeurons.get(k - sources.size()).setDesiredOutput(currentSample.get(k));
-					}
+					for (int k = 0; k < currentSample.size() - sources.size(); k++) {
+						outputNeurons.get(k).setDesiredOutput(currentSample.get(k + sources.size()));
+						double error = outputNeurons.get(k).getError(false);
 
-					//Modify the weights and biases
-					for (Neuron n : allNeurons) {
-						List<Double> newWeights = new ArrayList<>();
-						double newBias;
-
-						List<Double> previousWeights = n.getAllWeights();
-						double previousBias = previousWeights.get(previousWeights.size() - 1);
-						previousWeights.remove(previousWeights.size() - 1);
-
-						for (int k = 0; k < previousWeights.size(); k++){
-							newWeights.add(previousWeights.get(k) +  2 * mu * n.getDelta() * n.getInputAt(k));
+						//Modify the weights and biases
+						for (Neuron n : allNeurons) {
+							if (!outputNeurons.contains(n)) {
+								n.learn(mu, error);
+							}
 						}
 
-						printDoubleList(n.getDerivates());
-
-						newBias = previousBias + 2 * mu * n.getDelta();
-						n.setWeights(newWeights,newBias);
+						outputNeurons.get(k).learn(mu,error);
 					}
 
-					for (Neuron n : allNeurons){
-						n.markDirty();
+					//Mark cell dirty for the next iteration
+					for (Neuron n : allNeurons) {
+						n.onNextLearningCycle();
 					}
 				}
 
-				double sum = 0;
+				double errorSqrSum = 0;
 
-				//Get error square sum from validation samples
 				for (int j = 0; j < validationSamples.size(); j++) {
-					//Set inputs for this sample
 					currentSample = validationSamples.get(j);
-					for (int k = 0; k < sources.size() - 1; k++) {
+					for (int k = 0; k < sources.size(); k++) {
 						sources.get(k).setOutput(currentSample.get(k));
 					}
 
+					double thisError;
+
 					//Set desired outputs
-					for (int k = sources.size(); k < currentSample.size(); k++) {
-						outputNeurons.get(k - sources.size()).setDesiredOutput(currentSample.get(k));
-					}
-
-
-
-					for (OutputNeuron n : outputNeurons) {
-						sum+=n.getDelta()*n.getDelta();
+					for (int k = 0; k < currentSample.size() - sources.size(); k++) {
+						outputNeurons.get(k).setDesiredOutput(currentSample.get(k + sources.size()));
+						thisError = outputNeurons.get(k).getError(true);
+						errorSqrSum += thisError * thisError;
 					}
 				}
 
-				System.out.println(sum);
+				//System.out.println(errorSqrSum / (validationSamples.size() * outputNeurons.size()));
 			}
 
+			OutputStreamWriter ow = new OutputStreamWriter(new FileOutputStream("nn_solution_five.txt"));
+
 			//Finally...
-			System.out.println(architecture);
+			ow.write(architecture + System.getProperty("line.separator"));
+
+
 			for (Neuron n : allNeurons) {
-				printDoubleList(n.getAllWeights());
+				printDoubleList(n.getAllWeights(),ow);
 			}
+
+			ow.flush();
 
 
 		} catch (Exception e) {
@@ -182,11 +178,11 @@ public class NNSolutionFour {
 		}
 	}
 
-	private static void printDoubleList(List<Double> list) {
+	private static void printDoubleList(List<Double> list, OutputStreamWriter bw) throws IOException {
 		for (int i = 0; i < list.size(); i++) {
-			System.out.print(list.get(i));
-			if (i != list.size() - 1) System.out.print(",");
+			bw.write(list.get(i).toString());
+			if (i != list.size() - 1) bw.write(",");
 		}
-		System.out.print("\n");
+		bw.write(System.getProperty("line.separator"));
 	}
 }
